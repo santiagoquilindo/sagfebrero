@@ -4,7 +4,7 @@ const loadPartial = async (targetId, url) => {
   if (!container) return { targetId, loaded: false };
 
   try {
-    const response = await fetch(url, { cache: "no-cache" });
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Error HTTP ${response.status}`);
     }

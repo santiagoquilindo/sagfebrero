@@ -21,8 +21,10 @@
   ];
   const HERO_CAROUSEL_INTERVAL_MS = 4000;
   const MINI_CAROUSEL_FADE_MS = 200;
+  const BLOGGER_TIMEOUT_MS = 6000;
 
   let initialized = false;
+  let initPromise = null;
   let projectGallery = null;
 
   const setFooterYear = () => {
@@ -766,33 +768,44 @@
         container.dataset.bloggerState = "error";
         cleanup();
       }
-    }, 6000);
+    }, BLOGGER_TIMEOUT_MS);
   };
 
   const init = async () => {
     if (initialized) return;
-    setFooterYear();
-    setupNavToggle();
-    setupContactForms();
-    setupGalleryLightbox();
-    setupProjectGallery();
-    setupProjectCarousel();
-    loadBloggerNews();
-    setTimeout(() => loadBloggerNews(true), 2500);
-    // Asegura que las imagenes con data-src se resuelvan antes de mostrarlas
-    await loadImagesFromDataSrc();
-    setupHeroCarousel();
-    setupMiniCarousels();
-    highlightActiveNav();
-    initialized = true;
+    if (initPromise) return initPromise;
+
+    initPromise = (async () => {
+      try {
+        setupContactForms();
+        setupGalleryLightbox();
+        setupProjectGallery();
+        setupProjectCarousel();
+        loadBloggerNews();
+        setTimeout(() => loadBloggerNews(true), 2500);
+        // Asegura que las imagenes con data-src se resuelvan antes de mostrarlas
+        await loadImagesFromDataSrc();
+        setupHeroCarousel();
+        setupMiniCarousels();
+        initialized = true;
+      } catch (error) {
+        console.error("Error durante la inicializacion:", error);
+      }
+    })();
+
+    try {
+      await initPromise;
+    } finally {
+      initPromise = null;
+    }
   };
 
-  document.addEventListener("partials:loaded", init);
   document.addEventListener("partials:loaded", () => {
     // Reintenta cuando el header se inserta por AJAX
     setupNavToggle();
     setFooterYear();
     highlightActiveNav();
+    init();
   });
   window.loadBloggerNews = loadBloggerNews;
 })();
