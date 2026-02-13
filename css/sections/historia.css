@@ -74,6 +74,11 @@
   height: clamp(160px, 18vw, 240px);
 }
 
+.section-historia .team-gallery-grid img.history-gallery-img-4{
+  object-fit: cover;
+  object-position: center 72%;
+}
+
 
 .history-team{
   display: grid;
